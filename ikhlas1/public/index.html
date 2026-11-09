@@ -1,15 +1,14 @@
-<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0f5a4f">
 <title>ইখলাস</title><link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27>🕌</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Amiri&family=Noto+Sans+Bengali:wght@400;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css"></head><body>
-<header><h1>ইখলাস</h1><p>ইলম · যিকির · দুরুদ</p></header><main>
+<header><div class="ar">إخلاص</div><h1>ইখলাস</h1><p>ইলম, যিকির ও দুরুদ</p></header><main>
 <section class="tab on" id="t-lib"><h2>📚 লাইব্রেরি</h2><div class="chips" id="cats"></div><div class="books" id="books"></div></section>
 <section class="tab" id="t-tas"><h2>📿 তসবিহ</h2><div class="card" style="text-align:center"><div class="ar" id="tn"></div><div id="tc" style="color:var(--mut)"></div><button id="tap"><b id="tv">0</b>ট্যাপ করুন</button><div class="bar"><i id="tb"></i></div><p><button class="s" id="trs">রিসেট</button></p></div></section>
 <section class="tab" id="t-dur"><h2>🌙 শুক্রবারের দুরুদ প্রতিযোগিতা</h2>
-<div class="card fz"><div class="ar" id="dar"></div><div id="dfz"></div></div>
+<div class="card fz"><div class="ar" id="dar"></div><div id="dfz" style="text-align:center"></div></div>
 <div class="card" id="lg"></div><div class="card"><b>এই সপ্তাহের তালিকা</b> <small id="wk" style="color:var(--mut)"></small><div id="lb"></div></div></section>
 <section class="tab" id="t-ar"><h2>🔤 সহজ আরবি শিখি</h2><div class="card" id="qz"></div><div class="words" id="words"></div></section>
-<section class="tab" id="t-ln"><h2>🔗 লিংক</h2><div id="links"></div></section></main>
-<footer>app developed by almas and asrar</footer>
+<section class="tab" id="t-ln"><h2>🔗 লিংক</h2><div id="links"></div></section><footer>app developed by almas and asrar</footer></main>
 <nav id="nav"></nav>
 <script>
 const $=s=>document.querySelector(s),api=async(p,o={})=>{const r=await fetch('/api/'+p,o);if(!r.ok)throw Error((await r.json().catch(()=>({}))).error||'ত্রুটি');return r};
