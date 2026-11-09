@@ -1,2 +1,0 @@
-# Ikhlas-App
-IKHLAS
