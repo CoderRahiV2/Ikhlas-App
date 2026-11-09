@@ -1,0 +1,30 @@
+<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>ইখলাস অ্যাডমিন</title><link href="https://fonts.googleapis.com/css2?family=Amiri&family=Noto+Sans+Bengali:wght@400;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css"></head><body style="padding-bottom:20px">
+<header><h1>ইখলাস অ্যাডমিন</h1></header><main>
+<div class="card"><input id="pw" type="password" placeholder="অ্যাডমিন পাসওয়ার্ড"><button class="p" id="go">প্রবেশ</button></div>
+<div id="app" hidden>
+<div class="card"><h2>📤 বই আপলোড (সর্বোচ্চ ১২ এমবি PDF)</h2><input id="ti" placeholder="বইয়ের নাম"><input id="au" placeholder="লেখক"><select id="ca"><option value="novel">ইসলামী উপন্যাস</option><option value="book">বই</option><option value="hadith">হাদিসগ্রন্থ</option></select>
+<label>PDF ফাইল<input id="pf" type="file" accept="application/pdf"></label><label>কভার ছবি<input id="cf" type="file" accept="image/*"></label><button class="p" id="up">আপলোড করুন</button> <span id="st"></span></div>
+<div class="card"><h2>📚 বই তালিকা</h2><div id="bl"></div></div>
+<div class="card"><h2>🔤 আরবি শব্দ যোগ (প্রতিদিন একটি করে প্রকাশ হবে)</h2><input id="wa" placeholder="আরবি শব্দ" dir="rtl"><input id="wp" placeholder="উচ্চারণ (ঐচ্ছিক)"><input id="wb" placeholder="বাংলা অর্থ"><button class="p" id="wadd">শব্দ যোগ</button><div id="wl"></div></div>
+<div class="card"><h2>🔗 লিংক (প্রজেক্ট / ইখলাস গ্রুপ)</h2><div id="ll"></div><input id="lt" placeholder="শিরোনাম"><input id="lu" placeholder="https://…"><input id="lo" placeholder="ছোট বিবরণ"><button class="p" id="ladd">লিংক যোগ</button></div>
+<div class="card"><h2>🧹 স্টোরেজ পরিষ্কার</h2><p>প্রতি সোমবার দুরুদ প্রতিযোগিতার সব তথ্য মুছে ফেলুন।</p><button class="p" id="cl" style="background:#b3342b">প্রতিযোগিতার তথ্য মুছুন</button></div></div></main>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const api=async(p,o={})=>{o.headers={...o.headers,'x-admin':$('#pw').value};const r=await fetch('/api/'+p,o);const j=await r.clone().json().catch(()=>({}));if(!r.ok)throw Error(j.error||'ত্রুটি');return j};
+let links=[];
+async function load(){const[b,w,l]=await Promise.all([api('books'),api('words?all=1'),api('links')]);links=l;
+$('#bl').innerHTML=b.map(x=>`<div class="row"><span>${esc(x.title)} <small>(${(x.size/1048576).toFixed(1)}MB)</small></span><button class="s" onclick="del('books/${x.id}')">মুছুন</button></div>`).join('')||'<p>কোনো বই নেই।</p>';
+$('#wl').innerHTML=w.words.map((x,i)=>`<div class="row"><span>${i+1}. <span class="ar" style="font-size:20px">${esc(x.ar)}</span> — ${esc(x.bn)}</span><button class="s" onclick="del('words/${i}')">মুছুন</button></div>`).join('');
+$('#ll').innerHTML=l.map((x,i)=>`<div class="row"><span>${esc(x.title)}</span><button class="s" onclick="dl(${i})">মুছুন</button></div>`).join('')}
+async function del(p){if(confirm('নিশ্চিত?')){await api(p,{method:'DELETE'});load()}}
+async function dl(i){links.splice(i,1);await api('links',{method:'POST',body:JSON.stringify({links})});load()}
+$('#go').onclick=async()=>{try{await load();$('#app').hidden=false}catch(e){alert(e.message)}};
+$('#wadd').onclick=async()=>{try{await api('words',{method:'POST',body:JSON.stringify({ar:$('#wa').value,pr:$('#wp').value,bn:$('#wb').value})});['wa','wp','wb'].forEach(i=>$('#'+i).value='');load()}catch(e){alert(e.message)}};
+$('#ladd').onclick=async()=>{links.push({title:$('#lt').value,url:$('#lu').value,note:$('#lo').value});await api('links',{method:'POST',body:JSON.stringify({links})});['lt','lu','lo'].forEach(i=>$('#'+i).value='');load()};
+$('#cl').onclick=async()=>{if(confirm('সব প্রতিযোগিতার তথ্য মুছে যাবে। নিশ্চিত?')){const r=await api('durood',{method:'DELETE'});alert(r.deleted+' টি রেকর্ড মোছা হয়েছে')}};
+function cover(f){return new Promise(res=>{if(!f)return res('');const i=new Image();i.onload=()=>{const w=260,h=Math.round(i.height*w/i.width),c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(i,0,0,w,h);res(c.toDataURL('image/jpeg',.75))};i.src=URL.createObjectURL(f)})}
+$('#up').onclick=async()=>{const f=$('#pf').files[0];if(!f||!$('#ti').value)return alert('নাম ও PDF দিন');if(f.size>12*1048576)return alert('ফাইল ১২ এমবির বেশি');
+const id=Date.now().toString(36),C=4*1048576,n=Math.ceil(f.size/C);try{for(let i=0;i<n;i++){$('#st').textContent=`আপলোড ${i+1}/${n}…`;await api(`upload/${id}/${i}`,{method:'POST',body:f.slice(i*C,(i+1)*C)})}
+await api('books',{method:'POST',body:JSON.stringify({id,title:$('#ti').value,author:$('#au').value,cat:$('#ca').value,cover:await cover($('#cf').files[0]),chunks:n,size:f.size})});$('#st').textContent='✅ সম্পন্ন';['ti','au'].forEach(i=>$('#'+i).value='');$('#pf').value=$('#cf').value='';load()}catch(e){$('#st').textContent='';alert(e.message)}};
+</script></body></html>

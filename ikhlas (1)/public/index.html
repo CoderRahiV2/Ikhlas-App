@@ -1,0 +1,61 @@
+<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0f5a4f">
+<title>ইখলাস</title><link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27>🕌</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Amiri&family=Noto+Sans+Bengali:wght@400;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css"></head><body>
+<header><div class="ar">إخلاص</div><h1>ইখলাস</h1><p>ইলম, যিকির ও দুরুদ</p></header><main>
+<section class="tab on" id="t-lib"><h2>📚 লাইব্রেরি</h2><div class="chips" id="cats"></div><div class="books" id="books"></div></section>
+<section class="tab" id="t-tas"><h2>📿 তসবিহ</h2><div class="card" style="text-align:center"><div class="ar" id="tn"></div><div id="tc" style="color:var(--mut)"></div><button id="tap"><b id="tv">0</b>ট্যাপ করুন</button><div class="bar"><i id="tb"></i></div><p><button class="s" id="trs">রিসেট</button></p></div></section>
+<section class="tab" id="t-dur"><h2>🌙 শুক্রবারের দুরুদ প্রতিযোগিতা</h2>
+<div class="card fz"><div class="ar" id="dar"></div><div id="dfz" style="text-align:center"></div></div>
+<div class="card" id="lg"></div><div class="card"><b>এই সপ্তাহের তালিকা</b> <small id="wk" style="color:var(--mut)"></small><div id="lb"></div></div></section>
+<section class="tab" id="t-ar"><h2>🔤 সহজ আরবি শিখি</h2><div class="card" id="qz"></div><div class="words" id="words"></div></section>
+<section class="tab" id="t-ln"><h2>🔗 লিংক</h2><div id="links"></div></section><footer>app developed by almas and asrar</footer></main>
+<nav id="nav"></nav>
+<script>
+const $=s=>document.querySelector(s),api=async(p,o={})=>{const r=await fetch('/api/'+p,o);if(!r.ok)throw Error((await r.json().catch(()=>({}))).error||'ত্রুটি');return r};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const T=[['lib','📚','বই'],['tas','📿','তসবিহ'],['dur','🌙','দুরুদ'],['ar','🔤','আরবি'],['ln','🔗','লিংক']];
+$('#nav').innerHTML=T.map(t=>`<button data-t="${t[0]}"><b>${t[1]}</b>${t[2]}</button>`).join('');
+function go(t){document.querySelectorAll('.tab').forEach(e=>e.classList.toggle('on',e.id=='t-'+t));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==t));if(t=='dur')loadD();scrollTo(0,0)}
+$('#nav').onclick=e=>{const b=e.target.closest('button');b&&go(b.dataset.t)};go('lib');
+const bn=n=>String(n).replace(/\d/g,d=>'০১২৩৪৫৬৭৮৯'[d]);
+/* ---- library ---- */
+const CATS={all:'সব',novel:'ইসলামী উপন্যাস',book:'বই',hadith:'হাদিসগ্রন্থ'};let books=[],cat='all';
+function drawBooks(){$('#cats').innerHTML=Object.entries(CATS).map(([k,v])=>`<button class="${k==cat?'on':''}" data-c="${k}">${v}</button>`).join('');
+const l=books.filter(b=>cat=='all'||b.cat==cat);$('#books').innerHTML=l.length?l.map(b=>`<div class="bk">${b.cover?`<img src="${b.cover}" alt="">`:'<div class="nc">📖</div>'}<div class="i"><b>${esc(b.title)}</b><br><small>${esc(b.author)}</small></div><button class="p" data-id="${b.id}">পড়ুন</button></div>`).join(''):'<p>এই বিভাগে এখনো কোনো বই নেই।</p>'}
+$('#cats').onclick=e=>{if(e.target.dataset.c){cat=e.target.dataset.c;drawBooks()}};
+$('#books').onclick=async e=>{const id=e.target.dataset.id;if(!id)return;const bk=books.find(b=>b.id==id),btn=e.target;btn.textContent='লোড হচ্ছে…';
+try{const parts=[];for(let i=0;i<bk.chunks;i++)parts.push(await(await api(`file/${id}/${i}`)).arrayBuffer());
+const u=URL.createObjectURL(new Blob(parts,{type:'application/pdf'}));window.open(u,'_blank')||(location.href=u)}catch(x){alert(x.message)}btn.textContent='পড়ুন'};
+api('books').then(r=>r.json()).then(b=>{books=b;drawBooks()}).catch(()=>$('#books').innerHTML='<p>বই লোড করা যায়নি।</p>');
+/* ---- tasbih ---- */
+const S=[['সুবহানাল্লাহ','سُبْحَانَ ٱللَّٰهِ',33],['আলহামদুলিল্লাহ','ٱلْحَمْدُ لِلَّٰهِ',33],['আল্লাহু আকবার','ٱللَّٰهُ أَكْبَرُ',33],['লা হাওলা ওয়ালা কুওয়াতা ইল্লা বিল্লাহ','لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِٱللَّٰهِ',1]];
+let si=+localStorage.si||0,sc=+localStorage.sc||0;
+function tas(){const done=si>=S.length;$('#tn').textContent=done?'':S[si][1];$('#tc').textContent=done?'মাশাআল্লাহ! তসবিহ সম্পন্ন হয়েছে 🤲':S[si][0]+' — '+bn(S[si][2])+' বার';
+$('#tv').textContent=bn(done?0:sc);$('#tb').style.width=done?'100%':sc/S[si][2]*100+'%';localStorage.si=si;localStorage.sc=sc}
+$('#tap').onclick=()=>{if(si>=S.length)return;sc++;navigator.vibrate&&navigator.vibrate(15);if(sc>=S[si][2]){si++;sc=0;navigator.vibrate&&navigator.vibrate([60,40,60])}tas()};
+$('#trs').onclick=()=>{si=0;sc=0;tas()};tas();
+/* ---- durood ---- */
+const DU=[['اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ','যে ব্যক্তি আমার ওপর একবার দুরুদ পড়ে, আল্লাহ তার ওপর দশটি রহমত নাযিল করেন। (সহিহ মুসলিম)'],['اللَّهُمَّ صَلِّ وَسَلِّمْ عَلَى نَبِيِّنَا مُحَمَّدٍ','কিয়ামতের দিন আমার সবচেয়ে কাছের হবে সে, যে আমার ওপর সবচেয়ে বেশি দুরুদ পড়ে। (তিরমিযি)'],['صَلَّى ٱللَّٰهُ عَلَيْهِ وَسَلَّمَ','দুরুদ পড়লে গুনাহ মাফ হয় এবং মর্যাদা বৃদ্ধি পায়। (নাসায়ি)'],['اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ كَمَا صَلَّيْتَ عَلَى إِبْرَاهِيمَ','জুমার দিনে বেশি বেশি দুরুদ পড়ো; তোমাদের দুরুদ আমার কাছে পেশ করা হয়। (আবু দাউদ)']];
+const dd=new Date(Date.now()+6*36e5),dz=DU[Math.floor(dd/864e5)%DU.length];$('#dar').textContent=dz[0];$('#dfz').textContent=dz[1];
+const me=()=>JSON.parse(localStorage.me||'null');
+function lg(){const u=me();$('#lg').innerHTML=u?`<p>আসসালামু আলাইকুম, <b>${esc(u.name)}</b></p><input id="dn" type="number" min="1" value="1" inputmode="numeric"><p><button class="p" id="dadd">দুরুদ যোগ করুন</button> <button class="s" id="out">লগআউট</button></p>`:
+`<b>ইখলাস গ্রুপ লগইন</b><input id="ln" placeholder="আপনার নাম"><input id="lc" type="password" placeholder="গ্রুপ কোড"><button class="p" id="in">লগইন</button>`;
+if(u){$('#dadd').onclick=async()=>{try{await api('durood',{method:'POST',body:JSON.stringify({...u,count:+$('#dn').value})});loadD()}catch(x){alert(x.message)}};$('#out').onclick=()=>{localStorage.removeItem('me');lg()}}
+else $('#in').onclick=async()=>{const o={name:$('#ln').value,code:$('#lc').value};try{await api('login',{method:'POST',body:JSON.stringify(o)});localStorage.me=JSON.stringify(o);lg()}catch(x){alert(x.message)}}}
+async function loadD(){lg();try{const r=await(await api('durood')).json();$('#wk').textContent='(সপ্তাহ: '+r.week+')';
+$('#lb').innerHTML=r.list.length?r.list.map((x,i)=>`<div class="row"><span>${i<3?['🥇','🥈','🥉'][i]:bn(i+1)+'.'} ${esc(x.name)}</span><b>${bn(x.n)} বার</b></div>`).join(''):'<p>এখনো কেউ দুরুদ যোগ করেননি। আপনিই প্রথম হোন।</p>'}catch{}}
+/* ---- arabic ---- */
+let W=[];
+function quiz(){const fri=new Date(Date.now()+6*36e5).getUTCDay()==5;
+if(!fri)return $('#qz').innerHTML='<b>📝 সাপ্তাহিক কুইজ</b><p>কুইজ হবে প্রতি শুক্রবার। এখন পর্যন্ত শেখা শব্দ থেকেই প্রশ্ন আসবে।</p>';
+if(W.length<4)return $('#qz').innerHTML='<b>📝 সাপ্তাহিক কুইজ</b><p>কুইজের জন্য অন্তত ৪টি শব্দ শেখা দরকার।</p>';
+$('#qz').innerHTML='<b>📝 আজ জুমার কুইজ</b><p>শেখা শব্দের অর্থ কী?</p><button class="p" id="qs">কুইজ শুরু করুন</button>';
+$('#qs').onclick=()=>{const Q=[...W].sort(()=>Math.random()-.5).slice(0,10);let i=0,sc=0;
+const show=()=>{if(i>=Q.length)return $('#qz').innerHTML=`<b>ফলাফল: ${bn(sc)}/${bn(Q.length)}</b><p>${sc==Q.length?'মাশাআল্লাহ!':'চালিয়ে যান, ইনশাআল্লাহ ভালো হবে।'}</p><button class="p" id="qs2">আবার</button>`,$('#qs2').onclick=$('#qs').onclick;
+const w=Q[i],o=[w.bn,...W.filter(x=>x.bn!=w.bn).sort(()=>Math.random()-.5).slice(0,3).map(x=>x.bn)].sort(()=>Math.random()-.5);
+$('#qz').innerHTML=`<small>প্রশ্ন ${bn(i+1)}/${bn(Q.length)}</small><div class="ar" style="text-align:center">${esc(w.ar)}</div>`+o.map(t=>`<button class="s opt">${esc(t)}</button>`).join('');
+$('#qz').querySelectorAll('.opt').forEach(b=>b.onclick=()=>{const r=b.textContent==w.bn;if(r)sc++;b.classList.add(r?'ok':'no');$('#qz').querySelectorAll('.opt').forEach(x=>{x.disabled=1;if(x.textContent==w.bn)x.classList.add('ok')});i++;setTimeout(show,900)})};show()}}
+api('words').then(r=>r.json()).then(r=>{W=r.words;$('#words').innerHTML=W.length?[...W].reverse().map((w,i)=>`<div class="w ${i?'':'today'}"><div class="ar">${esc(w.ar)}</div>${w.pr?`<small>${esc(w.pr)}</small><br>`:''}<b>${esc(w.bn)}</b>${i?'':'<br><small>🌟 আজকের শব্দ</small>'}</div>`).join(''):'<p>প্রথম শব্দ শিগগিরই আসছে, ইনশাআল্লাহ।</p>';quiz()});
+/* ---- links ---- */
+api('links').then(r=>r.json()).then(l=>$('#links').innerHTML=l.length?l.map(x=>`<a class="card" style="display:block;color:inherit;text-decoration:none" href="${esc(x.url)}" target="_blank" rel="noopener"><b>${esc(x.title)}</b><br><small style="color:var(--mut)">${esc(x.note||'')}</small></a>`).join(''):'<p>এখনো কোনো লিংক যোগ করা হয়নি।</p>');
+</script></body></html>
